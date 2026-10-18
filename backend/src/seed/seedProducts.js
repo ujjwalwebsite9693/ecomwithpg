@@ -2,8 +2,8 @@ export const INITIAL_PRODUCTS = [
   {
     name: "Aura Pro Wireless ANC Headphones",
     description: "Flagship active noise cancellation, custom 40mm titanium drivers, 65-hour battery life, and spatial audio with dynamic head tracking.",
-    price: 4999,
-    originalPrice: 8999,
+    price: 5,
+    originalPrice: 10,
     category: "Audio",
     image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800&auto=format&fit=crop&q=80",
     images: [
@@ -15,7 +15,7 @@ export const INITIAL_PRODUCTS = [
     inStock: true,
     stockCount: 45,
     featured: true,
-    badge: "Bestseller - 44% OFF",
+    badge: "Bestseller - 50% OFF",
     specs: {
       "Battery": "65 Hours (ANC Off) / 45 Hours (ANC On)",
       "Connectivity": "Bluetooth 5.3 + 3.5mm Aux",
@@ -26,8 +26,8 @@ export const INITIAL_PRODUCTS = [
   {
     name: "Apex Ultra Smartwatch (OLED Titanium)",
     description: "Rugged Grade 5 Titanium casing, 1.96-inch Sapphire AMOLED 1000-nit display, ECG sensor, GPS dual-band, and 14-day endurance battery.",
-    price: 6499,
-    originalPrice: 11999,
+    price: 7,
+    originalPrice: 15,
     category: "Wearables",
     image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop&q=80",
     images: [
@@ -49,8 +49,8 @@ export const INITIAL_PRODUCTS = [
   {
     name: "Keyflow 75% Wireless Mechanical Keyboard",
     description: "Gasket-mounted hot-swappable tactile switches, frosted PBT dye-sub keycaps, RGB backlighting with per-key custom profiles, Bluetooth & 2.4GHz dongle.",
-    price: 3899,
-    originalPrice: 5999,
+    price: 4,
+    originalPrice: 8,
     category: "Accessories",
     image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=800&auto=format&fit=crop&q=80",
     images: [
@@ -72,8 +72,8 @@ export const INITIAL_PRODUCTS = [
   {
     name: "NovaBeam 4K HDR Home Cinema Projector",
     description: "Native 4K UHD laser projection, 2200 ANSI Lumens brightness, Dolby Atmos dual Harman Kardon speakers, Android TV 11 with Netflix built-in.",
-    price: 24999,
-    originalPrice: 34999,
+    price: 9,
+    originalPrice: 20,
     category: "Home Entertainment",
     image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&auto=format&fit=crop&q=80",
     images: [
@@ -95,8 +95,8 @@ export const INITIAL_PRODUCTS = [
   {
     name: "Pulse Pods 3 True Wireless Earbuds",
     description: "Ultra-low latency 35ms gaming mode, hybrid active noise cancellation, transparency mode, wireless Qi charging case with 36 hours total playtime.",
-    price: 2499,
-    originalPrice: 4499,
+    price: 2,
+    originalPrice: 5,
     category: "Audio",
     image: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=800&auto=format&fit=crop&q=80",
     images: [
@@ -118,8 +118,8 @@ export const INITIAL_PRODUCTS = [
   {
     name: "Vortex Magnetic Fast Wireless Charging Dock",
     description: "3-in-1 Foldable MagSafe compatible charging station for iPhone, Apple Watch, and AirPods. 15W Qi2 certified fast wireless output.",
-    price: 1999,
-    originalPrice: 3299,
+    price: 1,
+    originalPrice: 3,
     category: "Accessories",
     image: "https://images.unsplash.com/photo-1622445262464-84b1456045b6?w=800&auto=format&fit=crop&q=80",
     images: [
@@ -156,7 +156,11 @@ export async function seedProducts() {
       await Product.insertMany(INITIAL_PRODUCTS);
       console.log(`[Seed] Successfully seeded ${INITIAL_PRODUCTS.length} products.`);
     } else {
-      console.log(`[Seed] Database already contains ${count} products. Skipping.`);
+      console.log(`[Seed] Syncing products to ₹1-₹10 test price range...`);
+      for (const p of INITIAL_PRODUCTS) {
+        await Product.updateOne({ name: p.name }, { $set: { price: p.price, originalPrice: p.originalPrice } });
+      }
+      console.log(`[Seed] Products price sync complete.`);
     }
   } catch (err) {
     console.warn('[Seed Warning]:', err.message);

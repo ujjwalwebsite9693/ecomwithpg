@@ -26,20 +26,17 @@ export function CheckoutPage({ onOrderSuccess, onBackToStore }) {
   const [paymentStatusText, setPaymentStatusText] = useState('');
 
   const shippingFee = 0; // Free Priority Shipping
-  const totalAmount = Math.max(0, subtotal - discount + shippingFee);
+  const totalAmount = Math.max(1, subtotal - discount + shippingFee);
 
   const handleApplyCoupon = (e) => {
     e.preventDefault();
     const code = couponCode.trim().toUpperCase();
-    if (code === 'WELCOME100') {
-      setDiscount(100);
-      setCouponMessage({ type: 'success', text: '₹100 Welcome Discount Applied!' });
-    } else if (code === 'SAVE500' && subtotal >= 4000) {
-      setDiscount(500);
-      setCouponMessage({ type: 'success', text: '₹500 Mega Tech Discount Applied!' });
+    if ((code === 'WELCOME' || code === 'SAVE1' || code === 'WELCOME100') && subtotal > 1) {
+      setDiscount(1);
+      setCouponMessage({ type: 'success', text: '₹1 Special Test Discount Applied!' });
     } else {
       setDiscount(0);
-      setCouponMessage({ type: 'error', text: 'Invalid coupon code or minimum cart not met.' });
+      setCouponMessage({ type: 'error', text: 'Invalid coupon or cart total too low.' });
     }
   };
 
