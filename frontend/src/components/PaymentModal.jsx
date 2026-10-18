@@ -9,6 +9,7 @@ export function PaymentModal({ order, onClose, onSuccess }) {
   const [timeLeft, setTimeLeft] = useState(300); // 5 minutes in seconds
   const [isSimulating, setIsSimulating] = useState(false);
   const [error, setError] = useState(null);
+  const [copiedVpa, setCopiedVpa] = useState(false);
 
   // 1. Fetch dynamic single-use UPI info & QR code from integrated gateway
   useEffect(() => {
@@ -88,6 +89,14 @@ export function PaymentModal({ order, onClose, onSuccess }) {
     }
   };
 
+  const handleCopyVpa = () => {
+    if (upiData?.vpa) {
+      navigator.clipboard.writeText(upiData.vpa);
+      setCopiedVpa(true);
+      setTimeout(() => setCopiedVpa(false), 2000);
+    }
+  };
+
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
   const timeFormatted = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
@@ -100,7 +109,7 @@ export function PaymentModal({ order, onClose, onSuccess }) {
       width: '100vw',
       height: '100vh',
       zIndex: 200,
-      background: 'rgba(5, 8, 15, 0.82)',
+      background: 'rgba(5, 8, 15, 0.85)',
       backdropFilter: 'blur(12px)',
       display: 'flex',
       alignItems: 'center',
@@ -110,10 +119,12 @@ export function PaymentModal({ order, onClose, onSuccess }) {
       <div style={{
         width: '100%',
         maxWidth: '460px',
+        maxHeight: '92vh',
+        overflowY: 'auto',
         background: '#0d131f',
         border: '1px solid rgba(99, 102, 241, 0.35)',
         borderRadius: '1.25rem',
-        padding: '2rem',
+        padding: '1.75rem',
         boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8), 0 0 40px rgba(99, 102, 241, 0.2)',
         position: 'relative',
         animation: 'scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
@@ -136,21 +147,38 @@ export function PaymentModal({ order, onClose, onSuccess }) {
         </button>
 
         {/* Modal Header */}
-        <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.25rem 0.75rem', borderRadius: '1rem', background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.3)', marginBottom: '0.75rem' }}>
+        <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.25rem 0.75rem', borderRadius: '1rem', background: 'rgba(99, 102, 241, 0.15)', border: '1px solid rgba(99, 102, 241, 0.3)', marginBottom: '0.5rem' }}>
             <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10b981' }} />
             <span style={{ fontSize: '0.72rem', fontWeight: '700', color: '#818cf8', textTransform: 'uppercase' }}>
-              Sovereign UPI Gateway
+              Zero-Fee Sovereign UPI
             </span>
           </div>
 
-          <h2 style={{ fontSize: '1.35rem', marginBottom: '0.25rem', color: '#ffffff' }}>
-            Scan &amp; Pay via Any UPI App
+          <h2 style={{ fontSize: '1.3rem', marginBottom: '0.2rem', color: '#ffffff' }}>
+            Scan &amp; Pay via UPI
           </h2>
           <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
             Paying to: <strong style={{ color: '#f8fafc' }}>{upiData?.merchantName || 'NOVA Electro'}</strong>
           </div>
         </div>
+
+        {/* Demo VPA Alert (Critical Warning) */}
+        {upiData?.isDemoVpa && (
+          <div style={{
+            background: 'rgba(239, 68, 68, 0.12)',
+            border: '1px solid rgba(239, 68, 68, 0.3)',
+            borderRadius: '0.5rem',
+            padding: '0.65rem 0.85rem',
+            marginBottom: '1rem',
+            fontSize: '0.75rem',
+            color: '#fca5a5',
+            lineHeight: '1.4'
+          }}>
+            ⚠️ <strong>Placeholder UPI ID active</strong> (<code>{upiData.vpa}</code>).
+            Real UPI apps will report "Network error / VPA not found". Enter your real UPI ID in <strong>⚡ Gateway Setup</strong> or click <strong>Test Mode Simulator</strong> below!
+          </div>
+        )}
 
         {/* Amount Display */}
         <div style={{
@@ -158,23 +186,23 @@ export function PaymentModal({ order, onClose, onSuccess }) {
           background: 'rgba(15, 23, 42, 0.8)',
           border: '1px solid var(--border)',
           borderRadius: '0.75rem',
-          padding: '0.85rem',
-          marginBottom: '1.25rem'
+          padding: '0.75rem',
+          marginBottom: '1rem'
         }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '700' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-dim)', textTransform: 'uppercase', fontWeight: '700' }}>
             Total Amount Due
           </div>
           <div style={{ fontSize: '1.85rem', fontWeight: '800', color: '#38bdf8' }}>
             ₹{Number(order.totalAmount).toLocaleString('en-IN')}
           </div>
-          <div style={{ fontSize: '0.75rem', color: timeLeft > 60 ? '#10b981' : '#ef4444', fontWeight: '700', marginTop: '0.25rem' }}>
+          <div style={{ fontSize: '0.75rem', color: timeLeft > 60 ? '#10b981' : '#ef4444', fontWeight: '700', marginTop: '0.2rem' }}>
             ⏱️ Expires in {timeFormatted}
           </div>
         </div>
 
         {/* QR Code Card */}
         {loading ? (
-          <div style={{ height: '240px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', color: 'var(--text-muted)' }}>
+          <div style={{ height: '220px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', color: 'var(--text-muted)' }}>
             <div className="animate-spin" style={{ width: '32px', height: '32px', border: '3px solid #6366f1', borderTopColor: 'transparent', borderRadius: '50%' }} />
             <span style={{ fontSize: '0.85rem' }}>Generating Dynamic Single-Use QR...</span>
           </div>
@@ -183,14 +211,14 @@ export function PaymentModal({ order, onClose, onSuccess }) {
             ⚠️ {error}
           </div>
         ) : (
-          <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '1rem' }}>
             <div
               style={{
-                width: '240px',
-                height: '240px',
+                width: '220px',
+                height: '220px',
                 margin: '0 auto',
                 background: '#ffffff',
-                borderRadius: '0.85rem',
+                borderRadius: '0.75rem',
                 padding: '10px',
                 boxShadow: '0 8px 30px rgba(0, 0, 0, 0.6)'
               }}
@@ -200,45 +228,38 @@ export function PaymentModal({ order, onClose, onSuccess }) {
             <div style={{ marginTop: '0.6rem', fontSize: '0.75rem', color: 'var(--text-dim)' }}>
               Scan using <strong>GPay, PhonePe, Paytm, CRED, BHIM</strong>
             </div>
+
+            {/* Copy UPI VPA */}
+            <div style={{ marginTop: '0.4rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', fontSize: '0.75rem' }}>
+              <span style={{ color: 'var(--text-muted)' }}>UPI ID:</span>
+              <code style={{ color: '#38bdf8' }}>{upiData?.vpa}</code>
+              <button
+                onClick={handleCopyVpa}
+                style={{ background: 'none', border: 'none', color: '#818cf8', cursor: 'pointer', fontWeight: '600' }}
+              >
+                {copiedVpa ? '✓ Copied' : '📋 Copy'}
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Mobile UPI Deep Links (Visible on mobile/tap) */}
-        {upiData?.deepLinks && (
-          <div style={{ marginBottom: '1.25rem' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', textAlign: 'center', marginBottom: '0.5rem', fontWeight: '600' }}>
-              OR PAY DIRECTLY VIA APP:
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.4rem' }}>
-              <a
-                href={upiData.deepLinks.gpay}
-                className="btn-secondary"
-                style={{ padding: '0.4rem', fontSize: '0.72rem', textAlign: 'center', borderRadius: '6px' }}
-              >
-                GPay
-              </a>
-              <a
-                href={upiData.deepLinks.phonepe}
-                className="btn-secondary"
-                style={{ padding: '0.4rem', fontSize: '0.72rem', textAlign: 'center', borderRadius: '6px' }}
-              >
-                PhonePe
-              </a>
-              <a
-                href={upiData.deepLinks.paytm}
-                className="btn-secondary"
-                style={{ padding: '0.4rem', fontSize: '0.72rem', textAlign: 'center', borderRadius: '6px' }}
-              >
-                Paytm
-              </a>
-              <a
-                href={upiData.deepLinks.generic}
-                className="btn-secondary"
-                style={{ padding: '0.4rem', fontSize: '0.72rem', textAlign: 'center', borderRadius: '6px', color: '#818cf8', fontWeight: '700' }}
-              >
-                Any UPI
-              </a>
-            </div>
+        {/* Mobile UPI 1-Tap Trigger */}
+        {upiData?.upiUri && (
+          <div style={{ marginBottom: '1rem' }}>
+            <a
+              href={upiData.upiUri}
+              className="btn-primary"
+              style={{
+                display: 'block',
+                textAlign: 'center',
+                padding: '0.75rem',
+                fontSize: '0.9rem',
+                borderRadius: '0.6rem',
+                textDecoration: 'none'
+              }}
+            >
+              ⚡ Tap to Pay via UPI App (GPay/PhonePe/Paytm)
+            </a>
           </div>
         )}
 
@@ -248,13 +269,13 @@ export function PaymentModal({ order, onClose, onSuccess }) {
           alignItems: 'center',
           justifyContent: 'center',
           gap: '0.5rem',
-          fontSize: '0.78rem',
+          fontSize: '0.75rem',
           color: 'var(--text-muted)',
-          padding: '0.6rem',
+          padding: '0.5rem',
           borderRadius: '0.5rem',
           background: 'rgba(255, 255, 255, 0.02)',
           border: '1px solid var(--border)',
-          marginBottom: '1rem'
+          marginBottom: '0.75rem'
         }}>
           <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#38bdf8', animation: 'pulseGlow 1.5s infinite' }} />
           <span>Awaiting bank SMS confirmation from phone...</span>
@@ -266,14 +287,15 @@ export function PaymentModal({ order, onClose, onSuccess }) {
             onClick={handleSimulate}
             disabled={isSimulating}
             style={{
-              fontSize: '0.72rem',
-              color: '#94a3b8',
+              fontSize: '0.75rem',
+              color: '#38bdf8',
               textDecoration: 'underline',
               background: 'none',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              fontWeight: '600'
             }}
           >
-            {isSimulating ? 'Simulating bank credit...' : '⚡ Test Mode: Simulate Instant Bank Credit'}
+            {isSimulating ? 'Simulating bank credit...' : '⚡ Test Mode: Simulate Instant Bank Payment'}
           </button>
         </div>
 

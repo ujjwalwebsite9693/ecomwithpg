@@ -6,7 +6,7 @@ import { connectDB } from './config/db.js';
 import { productsRouter } from './routes/products.routes.js';
 import { ordersRouter } from './routes/orders.routes.js';
 import { webhookRouter } from './routes/webhook.routes.js';
-import { gatewayRouter } from './routes/gateway.routes.js';
+import { gatewayRouter, handlePairing, handleHeartbeat, handleSmsEvents } from './routes/gateway.routes.js';
 import { seedProducts } from './seed/seedProducts.js';
 
 dotenv.config();
@@ -19,7 +19,7 @@ connectDB().then(() => {
   seedProducts();
 });
 
-// Configure CORS for Vercel Frontend & Localhost
+// Configure CORS for Vercel Frontend, Localhost, and Mobile Devices
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
@@ -33,7 +33,7 @@ app.use(cors({
     if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
       callback(null, true);
     } else {
-      callback(null, true); // Permissive in dev, can restrict in strict prod
+      callback(null, true); // Permissive for mobile & dev
     }
   },
   credentials: true
@@ -60,6 +60,13 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Explicit Android Companion App Endpoints (ApiClient.java compatibility)
+app.post('/api/v1/pollers/android/pair', handlePairing);
+app.post('/api/v1/pollers/android/heartbeat', handleHeartbeat);
+app.post('/api/v1/pollers/android/events', handleSmsEvents);
+app.post('/api/v1/observers/sms', handleSmsEvents);
+app.post('/api/v1/observers/heartbeat', handleHeartbeat);
+
 // API Routes
 app.use('/api/products', productsRouter);
 app.use('/api/orders', ordersRouter);
@@ -81,10 +88,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : '127.0.0.1';
-app.listen(PORT, HOST, () => {
+// Listen on 0.0.0.0 so Android phone on same network or cloud can connect
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`====================================================`);
-  console.log(`🚀 YOUPI MERN Backend listening on port ${PORT}`);
+  console.log(`🚀 YOUPI MERN Backend listening on 0.0.0.0:${PORT}`);
   console.log(`📡 Health Check: http://localhost:${PORT}/health`);
   console.log(`📦 Products API: http://localhost:${PORT}/api/products`);
   console.log(`💳 Webhook URL:  http://localhost:${PORT}/api/webhook`);
