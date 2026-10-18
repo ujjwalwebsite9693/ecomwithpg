@@ -1,0 +1,12 @@
+{
+  "name": "youpi-mern-ecommerce-workspace",
+  "version": "1.0.0",
+  "description": "Production MERN E-Commerce Store with YOUPI PG V2 Gateway & HMAC Webhooks",
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix frontend install",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "seed": "npm --prefix backend run seed",
+    "build:frontend": "npm --prefix frontend run build"
+  }
+}
